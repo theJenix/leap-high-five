@@ -1,0 +1,12 @@
+cmake_minimum_required(VERSION 2.8)
+PROJECT( leap_high_five_proj )
+#//include_directories(~/Development/LeapDeveloperKit/LeapSDK/include)
+#//link_directories(~/Development/LeapDeveloperKit/LeapSDK/lib)
+
+SET(CMAKE_MODULE_PATH "Find-Leap" ${CMAKE_MODULE_PATH})
+FIND_PACKAGE(Leap REQUIRED)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+ADD_EXECUTABLE( leap_high_five leap_high_five.cpp )
+TARGET_LINK_LIBRARIES( leap_high_five ${LEAP_LIBRARIES} )
