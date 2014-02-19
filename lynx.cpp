@@ -13,8 +13,14 @@ LynxMoveGroup& LynxMoveGroup::move(int channel, int pos, int speed, int time) {
     return *this;
 }
 
-void LynxSSC::open_port() {
-    this->fd = open("/dev/tty.usbmodemfa141", O_RDWR | O_NOCTTY | O_NDELAY);
+LynxSSC::LynxSSC(const std::string& path, int baud) {
+    open_port(path);
+    configure_port(baud);
+}
+
+void LynxSSC::open_port(const std::string& path) {
+    cout << "Opening " << path.data() << endl;
+    this->fd = open(path.data(), O_RDWR | O_NOCTTY | O_NDELAY);
     if (this->fd == -1) {
         cout << "Unable to open port. \n";
     } else {
@@ -25,12 +31,12 @@ void LynxSSC::open_port() {
     cout << "\n";
 }
 
-void LynxSSC::configure_port() {
+void LynxSSC::configure_port(int baud) {
     struct termios options;
 
     tcgetattr(this->fd, &options);
-    cfsetispeed(&options, B9600);
-    cfsetospeed(&options, B9600);
+    cfsetispeed(&options, baud);
+    cfsetospeed(&options, baud);
 
     options.c_cflag &= ~PARENB;
     options.c_cflag &= ~CSTOPB;
@@ -39,6 +45,10 @@ void LynxSSC::configure_port() {
     options.c_cflag |= (CLOCAL | CREAD);
     tcsetattr(this->fd, TCSANOW, &options);
 
+    //send a command to establish a connection
+    //NOTE: this appears to be required, or else the first move command is
+    //ignored
+    write(this->fd, "VER\r", 4);
     cout << "Port configured.\n";
 }
 
@@ -74,7 +84,8 @@ void LynxSSC::move(const LynxMoveGroup& group) {
             strcat(cmd, temp);
         }
     }
-    strcat(cmd, "\n");
-
+    strcat(cmd, "\r");
+    cout << "Writing " << cmd << endl;
     write(this->fd, cmd, strlen(cmd));
+    tcdrain(this->fd);
 }

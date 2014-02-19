@@ -3,6 +3,7 @@
 #include <Leap.h>
 
 #include "lynx.h"
+#include <unistd.h>
 
 using namespace std;
 
@@ -90,6 +91,22 @@ class FrameListener : public Leap::Listener {
 
 int main(int argc, const char *argv[]) {
 
+    if (argc < 2) {
+        cout << "Usage: leap_high_five /path/to/serial\n";
+        return 1;
+    }
+
+    LynxSSC lynx(argv[1], 115200);
+//    lynx.move(3, 1500, -1, -1);
+    lynx.move(3, 1500, -1, -1);
+    sleep(2);
+    lynx.move(4, 500, -1, 1000);
+    sleep(2);
+    lynx.move(
+        LynxMoveGroup().move(3,1000,-1,500)
+                       .move(4,1500,-1,1000));
+
+return 0;
     cout << "Initializing controller";
     static Leap::Controller s_controller;
     FrameListener listener;
@@ -105,4 +122,5 @@ int main(int argc, const char *argv[]) {
     // }
 
     cin.get();
+    return 0;
 }

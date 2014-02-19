@@ -14,6 +14,7 @@ struct LynxMovement {
 
 class LynxMoveGroup {
     std::vector<LynxMovement> moves;
+public:
     LynxMoveGroup& move(int channel, int pos, int speed, int time);
 
 friend class LynxSSC;
@@ -23,11 +24,11 @@ class LynxSSC {
 
     int fd;
     
-    void configure_port();
-    void open_port();
+    void configure_port(int baud);
+    void open_port(const std::string& port);
     
 public:
-    LynxSSC(std::string& port);
+    LynxSSC(const std::string& port, int baud);
     void move(int channel, int pos, int speed, int time);
     void move(const LynxMoveGroup& group);
 };
