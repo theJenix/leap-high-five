@@ -38,6 +38,7 @@ struct WorldVector : public Vector3 {
     WorldVector(double v1, double v2, double v3) : Vector3(v1, v2, v3) {}
 };
 /*
+
 struct Jacobian3 {
     Vector3 data[3];
 

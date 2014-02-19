@@ -1,10 +1,17 @@
 
 #include <iostream>
 #include <fcntl.h>   /* File control definitions */
+#include "unistd.h"
 #include "termios.h"
 #include "lynx.h"
 
 using namespace std;
+
+LynxMoveGroup& LynxMoveGroup::move(int channel, int pos, int speed, int time) {
+    LynxMovement mv = {channel, pos, speed, time};
+    moves.push_back(mv);
+    return *this;
+}
 
 void LynxSSC::open_port() {
     this->fd = open("/dev/tty.usbmodemfa141", O_RDWR | O_NOCTTY | O_NDELAY);
@@ -37,23 +44,37 @@ void LynxSSC::configure_port() {
 
 // int LynxSCC::write_port()
 
-void LynxSSC::move(int channel, int pos, int speed, int time {
+void LynxSSC::move(int channel, int pos, int speed, int time) {
+    LynxMoveGroup group;
+    group.move(channel, pos, speed, time);
+    move(group);
+}
+
+void LynxSSC::move(const LynxMoveGroup& group) {
     char cmd[256] = {0};
     char temp[32] = {0};
     
-    sprintf(temp, "\#%d ", channel);
-    strcat(cmd, temp);
+    for (std::vector<LynxMovement>::const_iterator it = group.moves.begin();
+         it != group.moves.end();
+         it++) {
 
-    sprintf(temp, "P%d ", pos);
-    strcat(cmd, temp);
-
-    if (speed != -1) {
-        sprintf(temp, "S%d ", speed);
+        sprintf(temp, "#%d ", it->channel);
         strcat(cmd, temp);
-    }
 
-    if (time != -1) {
-        sprintf(temp, "T%d ", time);
+        sprintf(temp, "P%d ", it->pos);
         strcat(cmd, temp);
+
+        if (it->speed != -1) {
+            sprintf(temp, "S%d ", it->speed);
+            strcat(cmd, temp);
+        }
+
+        if (it->time != -1) {
+            sprintf(temp, "T%d ", it->time);
+            strcat(cmd, temp);
+        }
     }
+    strcat(cmd, "\n");
+
+    write(this->fd, cmd, strlen(cmd));
 }

@@ -10,13 +10,14 @@ struct LynxMovement {
     int pos;
     int speed;
     int time;
-}
+};
 
 class LynxMoveGroup {
     std::vector<LynxMovement> moves;
     LynxMoveGroup& move(int channel, int pos, int speed, int time);
-    void send();
-}
+
+friend class LynxSSC;
+};
 
 class LynxSSC {
 
@@ -26,11 +27,9 @@ class LynxSSC {
     void open_port();
     
 public:
-    LynxSSC(string& port);
+    LynxSSC(std::string& port);
     void move(int channel, int pos, int speed, int time);
-    LynxMoveGroup startGroup();
-
-    
+    void move(const LynxMoveGroup& group);
 };
 
 #endif //__LYNX_H
